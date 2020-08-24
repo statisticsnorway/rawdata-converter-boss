@@ -75,6 +75,16 @@
             <artifactId>micronaut-security-jwt</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>io.micronaut.flyway</groupId>
+            <artifactId>micronaut-flyway</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.micronaut.sql</groupId>
+            <artifactId>micronaut-vertx-pg-client</artifactId>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- no.ssb.* -->
         <dependency>
@@ -114,6 +124,11 @@
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.2.16</version>
         </dependency>
 
         <!-- test scoped -->
