@@ -2,6 +2,6 @@
 
 CREATE TABLE job
 (
-    id       varchar(100) PRIMARY KEY,
+    id       uuid PRIMARY KEY,
     document jsonb
 );

@@ -1,9 +1,11 @@
-vertx:
-  pg:
-    client:
-      port: 5432
-      host: localhost
-      database: rawdata_converter_jobs
-      user: boss
-      password: bossman
-      maxSize: 5
+datasources:
+  default:
+    url: jdbc:postgresql://localhost:5432/rawdata_converter_jobs
+    username: boss
+    password: "bossman"
+    driverClassName: org.postgresql.Driver
+
+flyway:
+  datasources:
+    default:
+      enabled: true

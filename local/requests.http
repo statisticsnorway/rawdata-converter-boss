@@ -1,0 +1,21 @@
+GET http://localhost:8080/job
+Accept: application/json
+
+###
+GET  http://localhost:8080/job/e80b99fd-1dc6-40e9-9719-77b0fbab768b
+Accept: application/json
+
+###
+POST http://localhost:8080/job/e80b99fd-1dc6-40e9-9719-77b0fbab768a
+Content-Type: application/json
+
+{
+  "job": {
+    "storageRoot": "gs://bucket",
+    "storagePath": "/tmp",
+    "storageVersion": 42,
+    "topic": "data",
+    "initialPosition": "LAST"
+  }
+}
+
