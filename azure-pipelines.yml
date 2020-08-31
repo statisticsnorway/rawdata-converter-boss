@@ -93,10 +93,12 @@ jobs:
 
       #Create image tag
       - bash: |
-          echo "Build.SourceBranchName: $(Build.SourceBranchName)"
-          echo "Build.SourceVersion: $(Build.SourceVersion)"
-          IMAGE_TAG="$(Build.SourceBranchName)-$(Build.SourceVersion:0:8)"
-          echo "Image tag: $(IMAGE_TAG)"
+          branch="$(Build.SourceBranchName)"
+          commit="$(Build.SourceVersion)"
+          echo "Branch: ${branch}"
+          echo "Commit: ${commit}"
+          IMAGE_TAG="${branch}-${commit:0:8}"
+          echo "Image tag: ${IMAGE_TAG}"
         displayName: 'Create image tag'
 
       #Docker build and push
