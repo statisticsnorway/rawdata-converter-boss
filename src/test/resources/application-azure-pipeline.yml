@@ -1,0 +1,11 @@
+datasources:
+  default:
+    url: jdbc:postgresql://postgres:5432/rawdata_converter_boss
+    username: boss
+    password: "bossman"
+    driverClassName: org.postgresql.Driver
+
+flyway:
+  datasources:
+    default:
+      enabled: true
