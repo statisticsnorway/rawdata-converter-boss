@@ -1,21 +1,37 @@
-GET http://localhost:8080/job
+HEAD http://localhost:8080/job/active/freg/01EGT0C4HKJCE68J258P7V8DF9
+
+###
+GET  http://localhost:8080/job/available/altinn3
 Accept: application/json
 
 ###
-GET  http://localhost:8080/job/e80b99fd-1dc6-40e9-9719-77b0fbab768b
+GET  http://localhost:8080/job/available
 Accept: application/json
 
 ###
-POST http://localhost:8080/job/e80b99fd-1dc6-40e9-9719-77b0fbab768a
+POST http://localhost:8080/job/available/freg
 Content-Type: application/json
 
 {
-  "job": {
+  "storageRoot": "gs://blabla",
+  "storagePath": "/data",
+  "storageVersion": 888,
+  "topic": "bong-topic",
+  "initialPosition": "FIRST"
+}
+
+###
+POST http://localhost:8080/job/available/freg/01EGP23ATM1D9B6CGC84APEA1Q
+Content-Type: application/json
+
+{
     "storageRoot": "gs://bucket",
     "storagePath": "/tmp",
     "storageVersion": 42,
     "topic": "data",
     "initialPosition": "LAST"
-  }
 }
 
+
+###
+POST http://localhost:8080/job/done/bong/01EGSZHRG9F3HKDN6SPNJQHRR6

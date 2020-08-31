@@ -1,19 +1,15 @@
 package no.ssb.rawdata.converter.job;
 
+import de.huxhorn.sulky.ulid.ULID;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
+import io.micronaut.http.annotation.Head;
 import io.micronaut.http.annotation.PathVariable;
 import io.micronaut.http.annotation.Post;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
@@ -25,94 +21,58 @@ public class JobController {
         this.repository = repository;
     }
 
-    @Post("/job/{id}")
-    public HttpResponse<JobResponse> postJob(@Body JobRequest request, @PathVariable UUID id) {
-        try {
-            int jobsCreated = repository.createJob(id, request.getJob());
-            if (jobsCreated < 1) {
-                return HttpResponse.status(HttpStatus.CONFLICT);
-            }
-            return HttpResponse.created(new JobResponse(id, request.getJob()));
-        } catch (Exception e) {
-            log.error(String.format("Failed to create job %s", request.getJob()), e);
-            return HttpResponse.serverError();
+    @Head("/job/active/{source}/{id}")
+    public HttpResponse<Void> isJobActive(@PathVariable String source, @PathVariable String id) {
+        if (repository.readJob(id, Job.Status.ACTIVE, source) == null) {
+            return HttpResponse.notFound();
         }
+        return HttpResponse.ok();
     }
 
-    @Post("/job")
-    public HttpResponse<JobResponse> postJob(@Body JobRequest request) {
-        try {
-            UUID id = UUID.randomUUID();
-            repository.createJob(id, request.getJob());
-            return HttpResponse.created(new JobResponse(id, request.getJob()));
-        } catch (Exception e) {
-            log.error(String.format("Failed to create job %s", request.getJob()), e);
-            return HttpResponse.serverError();
+    @Get("/job/available/{source}")
+    public HttpResponse<Job> findAvailableJob(@PathVariable String source) {
+        Job job = repository.findAvailableJob(source);
+        if (job == null) {
+            return HttpResponse.notFound();
         }
+        return HttpResponse.ok(job);
     }
 
-    @Get("/job/{id}")
-    public HttpResponse<JobResponse> getJob(@PathVariable UUID id) {
-        try {
-            Map<UUID, Job> jobs = repository.readJob(id);
-            if (jobs.isEmpty()) {
-                return HttpResponse.notFound();
-            }
-            return HttpResponse.ok(
-                    jobs
-                            .entrySet()
-                            .stream()
-                            .map(entry -> new JobResponse(entry.getKey(), entry.getValue()))
-                            .findFirst()
-                            .get()
-            );
-        } catch (Exception e) {
-            log.error("Could not read jobs", e);
-            return HttpResponse.serverError();
+    @Get("/job/available")
+    public HttpResponse<Job> findAvailableJob() {
+        Job job = repository.findAvailableJob();
+        if (job == null) {
+            return HttpResponse.notFound();
         }
+        return HttpResponse.ok(job);
     }
 
-    @Get("/job")
-    public HttpResponse<List<JobResponse>> getJobs() {
+    @Post("/job/available/{source}/{id}")
+    public HttpResponse<Job> createJob(@Body Job.Document document, @PathVariable String source, @PathVariable String id) {
         try {
-            return HttpResponse.ok(
-                    repository
-                            .readJobs()
-                            .entrySet()
-                            .stream()
-                            .map(entry -> new JobResponse(entry.getKey(), entry.getValue()))
-                            .collect(Collectors.toList())
-            );
+            ULID.parseULID(id);
         } catch (Exception e) {
-            log.error("Could not read jobs", e);
-            return HttpResponse.serverError();
+            log.warn("Got invalid id: '%s' expected an ulid string".formatted(id));
+            return HttpResponse.badRequest();
         }
+        if (repository.createJob(id, source, document) < 1) {
+            return HttpResponse.status(HttpStatus.CONFLICT); //a job with that id already exists
+        }
+        return HttpResponse.created(Job.create(id, Job.Status.AVAILABLE, source, document));
     }
 
-    @Data
-    static class JobRequest {
-        Job job;
+    @Post("/job/available/{source}")
+    public HttpResponse<Job> createJob(@Body Job.Document document, @PathVariable String source) {
+        String id = new ULID().nextULID();
+        repository.createJob(id, source, document);
+        return HttpResponse.created(Job.create(id, Job.Status.AVAILABLE, source, document));
     }
 
-    @Data
-    static class JobResponse {
-        final UUID id;
-        final Job job;
-    }
-
-    @Data
-    static class PseudoConfig {
-
-    }
-
-    @Data
-    static class Job {
-        String storageRoot;
-        String storagePath;
-        long storageVersion;
-        String topic;
-        String initialPosition;
-        PseudoConfig pseudoConfig;
-        Job() {}
+    @Post("/job/done/{source}/{id}")
+    public HttpResponse<Job> notifyJobDone(@PathVariable String source, @PathVariable String id) {
+        if (repository.jobDone(id, source) < 1) {
+            return HttpResponse.notFound();
+        }
+        return HttpResponse.ok();
     }
 }
