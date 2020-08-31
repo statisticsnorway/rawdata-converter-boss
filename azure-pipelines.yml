@@ -56,7 +56,7 @@ jobs:
         displayName: 'Test and build'
         inputs:
           goals: 'verify test'
-          options: '-P ssb-bip --batch-mode'
+          options: '-P ssb-bip --batch-mode -Dmicronaut.environments=azure-pipeline'
           mavenOptions: '$(MAVEN_OPTS)'
 
       # Publish pipeline artifact
