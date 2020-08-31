@@ -51,6 +51,10 @@ jobs:
         inputs:
           mavenServiceConnections: 'mvnSsbBipPublic, mvnSsbBipReleases, mvnSsbBipSnapshots'
 
+      - bash: |
+          ls -latr src/test/resources
+        displayName: 'Debug'
+
       #Test and build
       - task: Maven@3
         displayName: 'Test and build'
