@@ -91,6 +91,19 @@ jobs:
           command: 'login'
           containerRegistry: 'gcrServiceConnection'
 
+      #Create image tag
+      - bash: |
+          echo "Build.SourceBranchName: "
+          echo $(Build.SourceBranchName)
+          echo ""
+          echo "Build.SourceVersion: "
+          echo $(Build.SourceVersion)
+          IMAGE_TAG="${Build.SourceBranchName}-${Build.SourceVersion:0:8}"
+          echo "Image tag:"
+          echo ""
+          echo $IMAGE_TAG
+        displayName: 'Create image tag'
+
       #Docker build and push
       - task: Docker@2
         displayName: 'Build and push Docker image'
