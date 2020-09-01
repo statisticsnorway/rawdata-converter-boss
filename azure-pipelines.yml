@@ -24,7 +24,6 @@ resources:
         POSTGRES_USER: boss
         POSTGRES_PASSWORD: bossman
 
-
 jobs:
 
   - job: testAndBuild
@@ -123,6 +122,18 @@ jobs:
         inputs:
           secureFile: 'gcr-key.json'
 
+      #Create image tag
+      - bash: |
+          branch="$(Build.SourceBranchName)"
+          commit="$(Build.SourceVersion)"
+          echo "Branch: ${branch}"
+          echo "Commit: ${commit}"
+          IMAGE_TAG="${branch}-${commit:0:8}"
+          echo "Image tag: ${IMAGE_TAG}"
+          echo "##vso[task.setvariable variable=image_tag]${IMAGE_TAG}"
+        displayName: 'Create image tag'
+
+      # Tag production image
       - bash: |
           regex="refs/tags/(.*)"
           [[ $(Build.SourceBranch) =~ $regex ]]
