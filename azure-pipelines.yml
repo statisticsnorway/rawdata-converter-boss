@@ -92,14 +92,13 @@ jobs:
 
       #Create image tag
       - bash: |
-          branch="$(Build.SourceBranchName)"
-          commit="$(Build.SourceVersion)"
-          echo "Branch: ${branch}"
-          echo "Commit: ${commit}"
-          IMAGE_TAG="${branch}-${commit:0:8}"
+          BRANCH="$(Build.SourceBranchName)"
+          COMMIT_SHA="$(Build.SourceVersion)"
+          IMAGE_TAG="${BRANCH}-${COMMIT_SHA:0:8}"
           echo "Image tag: ${IMAGE_TAG}"
           echo "##vso[task.setvariable variable=image_tag]${IMAGE_TAG}"
         displayName: 'Create image tag'
+        failOnStderr: true
 
       #Docker build and push
       - task: Docker@2
@@ -122,22 +121,17 @@ jobs:
         inputs:
           secureFile: 'gcr-key.json'
 
-      #Create image tag
-      - bash: |
-          CURRENT_TAG="master-${$(Build.SourceVersion):0:8}"
-          echo "CURRENT_TAG: ${CURRENT_TAG}"
-        displayName: 'Create image tag'
-        failOnStderr: true
-
       # Tag production image
       - bash: |
           regex="refs/tags/(.*)"
           [[ $(Build.SourceBranch) =~ $regex ]]
           RELEASE_TAG="${BASH_REMATCH[1]}"
-          CURRENT_TAG="master-${$(Build.SourceVersion):0:8}"
-          echo "Tagging image eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$(Build.SourceVersion) with $RELEASE_TAG"
+          COMMIT_SHA="$(Build.SourceVersion)"
+          CURRENT_TAG="master-${COMMIT_SHA:0:8}"
+          echo "Tagging image eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$CURRENT_TAG with $RELEASE_TAG"
           cat $(gcrJsonKey.secureFilePath) | docker login -u _json_key --password-stdin https://eu.gcr.io
-          docker pull eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$(Build.SourceVersion)
-          docker tag eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$(Build.SourceVersion) eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$RELEASE_TAG
+          docker pull eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$CURRENT_TAG
+          docker tag eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$CURRENT_TAG eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$RELEASE_TAG
           docker push eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$RELEASE_TAG
         displayName: 'Tag production image'
+        failOnStderr: true
