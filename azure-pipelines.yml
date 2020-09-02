@@ -134,4 +134,3 @@ jobs:
           docker tag eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$CURRENT_TAG eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$RELEASE_TAG
           docker push eu.gcr.io/prod-bip/ssb/dapla/rawdata-converter-boss:$RELEASE_TAG
         displayName: 'Tag production image'
-        failOnStderr: true
